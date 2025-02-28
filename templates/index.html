@@ -45,7 +45,7 @@
         <h3 class="text-center">Marketing Campaign Prediction</h3>
         
         <form id="predictionForm">
-            <!-- 38 input fields (replace placeholders with actual feature names) -->
+            <!-- 38 input fields -->
             <label for="income" class="form-label">Income ($)</label>
             <input type="number" class="form-control" id="income" required>
 
@@ -91,7 +91,7 @@
             <label for="numwebvisits" class="form-label">Number of Web Visits</label>
             <input type="number" class="form-control" id="numwebvisits" required>
 
-            <!-- Add the remaining 22 feature input fields here -->
+            <!-- Add the remaining 22 feature input fields below -->
 
             <button type="button" class="btn btn-primary" onclick="getPrediction()">Predict</button>
         </form>
@@ -103,6 +103,10 @@
     <!-- JavaScript Code -->
     <script>
         async function getPrediction() {
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("result").innerText = "";
+
+            // Collect input data
             let inputData = {
                 features: [
                     parseFloat(document.getElementById("income").value),
@@ -120,26 +124,46 @@
                     parseInt(document.getElementById("numcatalog").value),
                     parseInt(document.getElementById("numstore").value),
                     parseInt(document.getElementById("numwebvisits").value)
-                    // Add the remaining 22 features
+                    // Add remaining fields...
                 ]
             };
 
-            let response = await fetch("http://localhost:8080/predict", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(inputData)
-            });
+            // Validate all inputs are filled
+            if (inputData.features.includes(NaN)) {
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("result").innerText = "Please fill all fields!";
+                document.getElementById("result").style.color = "red";
+                return;
+            }
 
-            let result = await response.json();
-            document.getElementById("loading").style.display = "none";
+            // API URL (change based on local vs production)
+            let apiUrl = "http://localhost:8080/predict"; // Local testing
+            // let apiUrl = "https://marketing-campaign-api.herokuapp.com/predict"; // Use this when deployed
 
-            if ("prediction" in result) {
-                let predictionText = result.prediction === 1 ? " Positive Response (Likely to Accept Offer)" 
-                                                             : " Negative Response (Unlikely to Accept)";
-                document.getElementById("result").innerText = predictionText;
-                document.getElementById("result").style.color = result.prediction === 1 ? "green" : "red";
-            } else {
-                document.getElementById("result").innerText = " Error: " + result.error;
+            try {
+                let response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(inputData)
+                });
+
+                let result = await response.json();
+                document.getElementById("loading").style.display = "none";
+
+                if ("prediction" in result) {
+                    let predictionText = result.prediction === 1 
+                        ? "Positive Response (Likely to Accept Offer)" 
+                        : "Negative Response (Unlikely to Accept)";
+                    
+                    document.getElementById("result").innerText = predictionText;
+                    document.getElementById("result").style.color = result.prediction === 1 ? "green" : "red";
+                } else {
+                    document.getElementById("result").innerText = "Error: " + result.error;
+                    document.getElementById("result").style.color = "red";
+                }
+            } catch (error) {
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("result").innerText = "Server error. Try again later.";
                 document.getElementById("result").style.color = "red";
             }
         }
