@@ -103,8 +103,11 @@
             ];
 
             let inputData = { features: features };
-            
-            let apiUrl = "http://127.0.0.1:8080/predict"; // Local Flask API
+ 
+              // Use your production URL 
+            let apiUrl = "https://marketing-campaign-api-1ee74f51958a.herokuapp.com/predict";
+              // For local testing, you can use:
+              // let apiUrl = "http://localhost:8080/predict";
 
             try {
                 let response = await fetch(apiUrl, {
