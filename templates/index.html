@@ -131,10 +131,10 @@
       
       let inputData = { features: features };
       
-      // for local testing
-      // let apiUrl = "http://localhost:8080/predict";
-      // For production deployment on Heroku
+      // For production deployment on Heroku, use the line below:
       let apiUrl = "https://marketing-campaign-api.herokuapp.com/predict";
+      // For local testing, you can use:
+      // let apiUrl = "http://localhost:8080/predict";
       
       try {
         let response = await fetch(apiUrl, {
@@ -142,6 +142,15 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(inputData)
         });
+        
+        // Check if response is OK
+        if (!response.ok) {
+          let errorText = await response.text();
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("result").innerText = "Error " + response.status + ": " + errorText;
+          document.getElementById("result").style.color = "red";
+          return;
+        }
         
         let result = await response.json();
         document.getElementById("loading").style.display = "none";
@@ -158,7 +167,7 @@
         }
       } catch (error) {
         document.getElementById("loading").style.display = "none";
-        document.getElementById("result").innerText = "Server error. Try again later.";
+        document.getElementById("result").innerText = "Server error. Try again later. " + error;
         document.getElementById("result").style.color = "red";
       }
     }
