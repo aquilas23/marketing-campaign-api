@@ -12,16 +12,16 @@ CORS(app)  # Enable CORS for front-end requests
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
-# Define model path
+# Load model and scaler
 MODEL_PATH = "marketing_campaign_model.pkl"
+SCALER_PATH = "scaler.pkl"
 
-# Check if model file exists
-if not os.path.exists(MODEL_PATH):
-    raise FileNotFoundError(f"Model file not found at {MODEL_PATH}")
+if not os.path.exists(MODEL_PATH) or not os.path.exists(SCALER_PATH):
+    raise FileNotFoundError("Model or scaler file is missing!")
 
-# Load the trained model
 model = joblib.load(MODEL_PATH)
-logging.info(f"Model loaded successfully. Expecting {model.n_features_in_} features.")
+scaler = joblib.load(SCALER_PATH)
+logging.info("✅ Model loaded successfully. Expecting 10 features.")
 
 @app.route("/", methods=["GET"])
 def home():
@@ -30,39 +30,25 @@ def home():
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
-        # Get input JSON data
         data = request.get_json()
-        logging.info(f"Received data: {data}")
 
-        # Validate JSON structure
-        if "features" not in data:
-            return jsonify({"error": "Missing 'features' key in request"}), 400
+        if "features" not in data or len(data["features"]) != 10:
+            return jsonify({"error": "Expected 10 features, got {}".format(len(data.get("features", [])))}), 400
 
-        # Convert input to NumPy array
         input_data = np.array(data["features"]).reshape(1, -1)
 
-        # Ensure input matches model expectations
-        expected_features = model.n_features_in_
-        if input_data.shape[1] != expected_features:
-            error_msg = f"Expected {expected_features} features, got {input_data.shape[1]}"
-            logging.error(error_msg)
-            return jsonify({"error": error_msg}), 400
-
-        # Log input values
-        logging.info(f"Input data for prediction: {input_data}")
+        # Scale input data
+        input_data = scaler.transform(input_data)
 
         # Make prediction
         prediction = model.predict(input_data)[0]
-        logging.info(f"Prediction: {prediction}")
 
-        # Return response
         return jsonify({"prediction": int(prediction)})
 
     except Exception as e:
         logging.error(f"Error during prediction: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 8080))  # Use Heroku's port if available, otherwise 8080 for local testing
-    logging.info(f"Starting Flask server on port {port}...")
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))
     app.run(debug=True, host="0.0.0.0", port=port)
