@@ -8,29 +8,23 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-      
-    - name: Install Heroku CLI
-      run: |
-        curl https://cli-assets.heroku.com/install.sh | sh
+      # 1) Check out your repo so the runner can access your code
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: 3.9
+      # 2) Install Heroku CLI
+      - name: Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
 
-    - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
+      # 3) Log in to Heroku Container Registry using your HEROKU_API_KEY secret
+      - name: Docker login to Heroku
+        run: echo "${{ secrets.HEROKU_API_KEY }}" | docker login --username=_ --password-stdin registry.heroku.com
 
-    - name: Login to Heroku
-      run: echo "${{ secrets.HEROKU_API_KEY }}" | docker login --username=_ --password-stdin registry.heroku.com
-
-    - name: Build and push Docker image
-      run: |
-        heroku container:login
-        heroku container:push web --app ${{ secrets.HEROKU_APP_NAME }}
-        heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}
+      # 4) Build and push container to Heroku, then release
+      - name: Build and push Docker image
+        run: |
+          heroku container:login
+          heroku container:push web --app ${{ secrets.HEROKU_APP_NAME }}
+          heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}
