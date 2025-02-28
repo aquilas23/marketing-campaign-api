@@ -1,0 +1,10 @@
+lost+found/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+venv/
+.idea/
+.vscode/
+.DS_Store
