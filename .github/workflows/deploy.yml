@@ -9,7 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # 1) Check out your repo so the runner can access your code
+      # 1) Check out your code
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -18,11 +18,14 @@ jobs:
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-      # 3) Log in to Heroku Container Registry using your HEROKU_API_KEY secret
-      - name: Docker login to Heroku
-        run: echo "${{ secrets.HEROKU_API_KEY }}" | docker login --username=_ --password-stdin registry.heroku.com
+      # 3) Provide Heroku credentials via ~/.netrc
+      - name: Configure Heroku credentials
+        run: |
+          echo "machine api.heroku.com login _ password ${{ secrets.HEROKU_API_KEY }}" >> ~/.netrc
+          echo "machine git.heroku.com login _ password ${{ secrets.HEROKU_API_KEY }}" >> ~/.netrc
+          chmod 600 ~/.netrc
 
-      # 4) Build and push container to Heroku, then release
+      # 4) Build and push Docker image, then release on Heroku
       - name: Build and push Docker image
         run: |
           heroku container:login
