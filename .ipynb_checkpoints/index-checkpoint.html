@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing Campaign Prediction</title>
+    
+    <!-- Bootstrap CDN -->
+    <link rel="stylesheet" 
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 500px;
+            background: white;
+            margin: auto;
+            margin-top: 50px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            width: 100%;
+        }
+        .result {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 15px;
+            text-align: center;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            font-size: 16px;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h3 class="text-center">Marketing Campaign Prediction</h3>
+
+        <div class="mb-3">
+            <label for="income" class="form-label">Income ($)</label>
+            <input type="number" class="form-control" id="income" placeholder="Enter Income">
+        </div>
+
+        <div class="mb-3">
+            <label for="kidhome" class="form-label">Kids at Home</label>
+            <input type="number" class="form-control" id="kidhome" placeholder="Number of kids">
+        </div>
+
+        <div class="mb-3">
+            <label for="teenhome" class="form-label">Teens at Home</label>
+            <input type="number" class="form-control" id="teenhome" placeholder="Number of teens">
+        </div>
+
+        <div class="mb-3">
+            <label for="recency" class="form-label">Recency (days)</label>
+            <input type="number" class="form-control" id="recency" placeholder="Days since last purchase">
+        </div>
+
+        <div class="mb-3">
+            <label for="mntwines" class="form-label">Amount Spent on Wine ($)</label>
+            <input type="number" class="form-control" id="mntwines" placeholder="Amount spent on wine">
+        </div>
+
+        <div class="mb-3">
+            <label for="mntfruits" class="form-label">Amount Spent on Fruits ($)</label>
+            <input type="number" class="form-control" id="mntfruits" placeholder="Amount spent on fruits">
+        </div>
+
+        <button class="btn btn-primary" onclick="getPrediction()">Predict</button>
+
+        <p class="loading" id="loading">Processing...</p>
+        <p class="result" id="result"></p>
+    </div>
+
+    <!-- JavaScript Code -->
+    <script>
+        async function getPrediction() {
+            // Get user input values
+            let income = parseFloat(document.getElementById("income").value);
+            let kidhome = parseInt(document.getElementById("kidhome").value);
+            let teenhome = parseInt(document.getElementById("teenhome").value);
+            let recency = parseInt(document.getElementById("recency").value);
+            let mntwines = parseFloat(document.getElementById("mntwines").value);
+            let mntfruits = parseFloat(document.getElementById("mntfruits").value);
+
+            // Validate input
+            if (isNaN(income) || isNaN(kidhome) || isNaN(teenhome) || isNaN(recency) || isNaN(mntwines) || isNaN(mntfruits)) {
+                document.getElementById("result").innerText = " Please enter valid numbers in all fields!";
+                document.getElementById("result").style.color = "red";
+                return;
+            }
+
+            let inputData = { features: [income, kidhome, teenhome, recency, mntwines, mntfruits] };
+
+            // Show loading indicator
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("result").innerText = "";
+
+            try {
+                let response = await fetch("http://localhost:5000/predict", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(inputData)
+                });
+
+                let result = await response.json();
+                document.getElementById("loading").style.display = "none";
+
+                if ("prediction" in result) {
+                    let predictionText = result.prediction === 1 ? " Positive Response (Likely to Accept Offer)" 
+                                                                 : " Negative Response (Unlikely to Accept)";
+                    document.getElementById("result").innerText = predictionText;
+                    document.getElementById("result").style.color = result.prediction === 1 ? "green" : "red";
+                } else {
+                    document.getElementById("result").innerText = "Error: " + result.error;
+                    document.getElementById("result").style.color = "red";
+                }
+
+            } catch (error) {
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("result").innerText = " Unable to connect to server.";
+                document.getElementById("result").style.color = "red";
+            }
+        }
+    </script>
+
+</body>
+</html>
