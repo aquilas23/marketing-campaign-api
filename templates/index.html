@@ -5,16 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marketing Campaign Prediction</title>
     
-    <!-- Bootstrap CDN -->
-    <link rel="stylesheet" 
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 
     <style>
         body {
             background-color: #f8f9fa;
         }
         .container {
-            max-width: 600px;
+            max-width: 500px;
             background: white;
             margin: auto;
             margin-top: 50px;
@@ -45,55 +44,38 @@
         <h3 class="text-center">Marketing Campaign Prediction</h3>
         
         <form id="predictionForm">
-            <!-- 38 input fields (replace placeholders with actual feature names) -->
+            <!-- 10 input fields with default values -->
             <label for="income" class="form-label">Income ($)</label>
-            <input type="number" class="form-control" id="income" required>
-
-            <label for="kidhome" class="form-label">Kids at Home</label>
-            <input type="number" class="form-control" id="kidhome" required>
-
-            <label for="teenhome" class="form-label">Teens at Home</label>
-            <input type="number" class="form-control" id="teenhome" required>
+            <input type="number" class="form-control" id="income" value="70000" required>
 
             <label for="recency" class="form-label">Recency (days)</label>
-            <input type="number" class="form-control" id="recency" required>
+            <input type="number" class="form-control" id="recency" value="10" required>
 
             <label for="mntwines" class="form-label">Amount Spent on Wine ($)</label>
-            <input type="number" class="form-control" id="mntwines" required>
+            <input type="number" class="form-control" id="mntwines" value="400" required>
 
             <label for="mntfruits" class="form-label">Amount Spent on Fruits ($)</label>
-            <input type="number" class="form-control" id="mntfruits" required>
+            <input type="number" class="form-control" id="mntfruits" value="100" required>
 
             <label for="mntmeat" class="form-label">Amount Spent on Meat ($)</label>
-            <input type="number" class="form-control" id="mntmeat" required>
+            <input type="number" class="form-control" id="mntmeat" value="300" required>
 
             <label for="mntfish" class="form-label">Amount Spent on Fish ($)</label>
-            <input type="number" class="form-control" id="mntfish" required>
+            <input type="number" class="form-control" id="mntfish" value="80" required>
 
             <label for="mntsweets" class="form-label">Amount Spent on Sweets ($)</label>
-            <input type="number" class="form-control" id="mntsweets" required>
-
-            <label for="mntgold" class="form-label">Amount Spent on Gold ($)</label>
-            <input type="number" class="form-control" id="mntgold" required>
+            <input type="number" class="form-control" id="mntsweets" value="50" required>
 
             <label for="numdeals" class="form-label">Number of Deals Purchased</label>
-            <input type="number" class="form-control" id="numdeals" required>
-
-            <label for="numweb" class="form-label">Number of Web Purchases</label>
-            <input type="number" class="form-control" id="numweb" required>
+            <input type="number" class="form-control" id="numdeals" value="5" required>
 
             <label for="numcatalog" class="form-label">Number of Catalog Purchases</label>
-            <input type="number" class="form-control" id="numcatalog" required>
+            <input type="number" class="form-control" id="numcatalog" value="3" required>
 
             <label for="numstore" class="form-label">Number of Store Purchases</label>
-            <input type="number" class="form-control" id="numstore" required>
+            <input type="number" class="form-control" id="numstore" value="7" required>
 
-            <label for="numwebvisits" class="form-label">Number of Web Visits</label>
-            <input type="number" class="form-control" id="numwebvisits" required>
-
-            <!-- Add the remaining 22 feature input fields here -->
-
-            <button type="button" class="btn btn-primary" onclick="getPrediction()">Predict</button>
+            <button type="button" class="btn btn-primary mt-3" onclick="getPrediction()">Predict</button>
         </form>
 
         <p class="loading" id="loading">Processing...</p>
@@ -103,43 +85,50 @@
     <!-- JavaScript Code -->
     <script>
         async function getPrediction() {
-            let inputData = {
-                features: [
-                    parseFloat(document.getElementById("income").value),
-                    parseInt(document.getElementById("kidhome").value),
-                    parseInt(document.getElementById("teenhome").value),
-                    parseInt(document.getElementById("recency").value),
-                    parseFloat(document.getElementById("mntwines").value),
-                    parseFloat(document.getElementById("mntfruits").value),
-                    parseFloat(document.getElementById("mntmeat").value),
-                    parseFloat(document.getElementById("mntfish").value),
-                    parseFloat(document.getElementById("mntsweets").value),
-                    parseFloat(document.getElementById("mntgold").value),
-                    parseInt(document.getElementById("numdeals").value),
-                    parseInt(document.getElementById("numweb").value),
-                    parseInt(document.getElementById("numcatalog").value),
-                    parseInt(document.getElementById("numstore").value),
-                    parseInt(document.getElementById("numwebvisits").value)
-                    // Add the remaining 22 features
-                ]
-            };
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("result").innerText = "";
+            
+            // Gather 10 features from the input fields
+            let features = [
+                parseFloat(document.getElementById("income").value),
+                parseInt(document.getElementById("recency").value),
+                parseFloat(document.getElementById("mntwines").value),
+                parseFloat(document.getElementById("mntfruits").value),
+                parseFloat(document.getElementById("mntmeat").value),
+                parseFloat(document.getElementById("mntfish").value),
+                parseFloat(document.getElementById("mntsweets").value),
+                parseInt(document.getElementById("numdeals").value),
+                parseInt(document.getElementById("numcatalog").value),
+                parseInt(document.getElementById("numstore").value)
+            ];
 
-            let response = await fetch("http://localhost:8080/predict", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(inputData)
-            });
+            let inputData = { features: features };
+ 
+            let apiUrl = "https://marketing-campaign-api-1ee74f51958a.herokuapp.com/predict";
+            
+            try {
+                let response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(inputData)
+                });
 
-            let result = await response.json();
-            document.getElementById("loading").style.display = "none";
+                let result = await response.json();
+                document.getElementById("loading").style.display = "none";
 
-            if ("prediction" in result) {
-                let predictionText = result.prediction === 1 ? " Positive Response (Likely to Accept Offer)" 
-                                                             : " Negative Response (Unlikely to Accept)";
-                document.getElementById("result").innerText = predictionText;
-                document.getElementById("result").style.color = result.prediction === 1 ? "green" : "red";
-            } else {
-                document.getElementById("result").innerText = " Error: " + result.error;
+                if ("prediction" in result) {
+                    let predictionText = result.prediction === 1 
+                        ? "Positive Response (Likely to Accept Offer)" 
+                        : "Negative Response (Unlikely to Accept)";
+                    document.getElementById("result").innerText = predictionText;
+                    document.getElementById("result").style.color = result.prediction === 1 ? "green" : "red";
+                } else {
+                    document.getElementById("result").innerText = "Error: " + result.error;
+                    document.getElementById("result").style.color = "red";
+                }
+            } catch (error) {
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("result").innerText = "Server error. Try again later.";
                 document.getElementById("result").style.color = "red";
             }
         }
