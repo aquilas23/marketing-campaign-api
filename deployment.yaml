@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: marketing-model
+  labels:
+    app: marketing-model
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: marketing-model
+  template:
+    metadata:
+      labels:
+        app: marketing-model
+    spec:
+      containers:
+      - name: marketing-model
+        image: 904233093112.dkr.ecr.us-east-1.amazonaws.com/marketing-campaign-app-680:latest
+        ports:
+        - containerPort: 8080
