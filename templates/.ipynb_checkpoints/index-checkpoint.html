@@ -88,7 +88,7 @@
             document.getElementById("loading").style.display = "block";
             document.getElementById("result").innerText = "";
             
-            // Gather 10 features from the input fields
+            // Features from the input fields
             let features = [
                 parseFloat(document.getElementById("income").value),
                 parseInt(document.getElementById("recency").value),
@@ -104,11 +104,8 @@
 
             let inputData = { features: features };
  
-              // Use your production URL 
             let apiUrl = "https://marketing-campaign-api-1ee74f51958a.herokuapp.com/predict";
-              // For local testing, you can use:
-              // let apiUrl = "http://localhost:8080/predict";
-
+              
             try {
                 let response = await fetch(apiUrl, {
                     method: "POST",
